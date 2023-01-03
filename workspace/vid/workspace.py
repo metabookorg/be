@@ -1,1 +1,0 @@
-import make_a_video_pytorch
