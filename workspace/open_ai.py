@@ -15,9 +15,17 @@ class GPT3:
         3: 'text-davinci-003'
     }
 
+    edit_models_map: tp.Dict[int, str] = {
+        0: 'text-ada-edit-001',
+        1: 'text-babbage-edit-001',
+        2: 'text-curie-edit-001',
+        3: 'text-davinci-edit-003'
+    }
     @classmethod
-    def _get_max_tokens(cls, level: int, max_tokens: int, text_in: str) -> int:
+    def _get_max_tokens(cls, level: int, max_tokens: int | None, text_in: str) -> int:
         maximum = 4000 if level == 4 else 2048
+        if not isinstance(max_tokens, int):
+            return maximum - len(text_in)
         return min(max_tokens, maximum - len(text_in))
 
     @classmethod
@@ -33,12 +41,12 @@ class GPT3:
         return max(min(float(variability), 2), -2)
 
     @classmethod
-    def create(cls, level: int, text_in: str, max_tokens: int, creativity_risk: float,
-               suffix: str = None, one_sentence_mode: bool = False, topic_variability: float = 0,
-               word_variability: float = 0) -> str:
+    def create(cls, text_in: str, creativity_risk: float,
+               level: int = 3, max_tokens: int = None, suffix: str = None, one_sentence_mode: bool = False,
+               topic_variability: float = 0, word_variability: float = 0) -> str:
         # TODO: use logit_bias
         if level not in cls.models_map:
-            level = 4
+            level = 3
         response = openai.Completion.create(
             model=cls.models_map[level],
             prompt=text_in,
@@ -47,17 +55,22 @@ class GPT3:
             temperature=cls._get_temperature(creativity_risk=creativity_risk),
             stop=cls._get_stop(one_sentence_mode=one_sentence_mode),
             presence_penalty=cls._get_penalty(variability=topic_variability),
-            frequence_penalty=cls._get_penalty(variability=word_variability)
+            #frequence_penalty=cls._get_penalty(variability=word_variability)
         )
         return response['choices'][0]['text']
 
     @classmethod
-    def edit(cls, text: str, edit: str, creativity_risk: float):
-        raise Exception('GPT3.edit(...) not yet implemented!')
+    def edit(cls, text: str, edit: str, creativity_risk: float, level: int = 3):
+        # todo: gives openai.error.InvalidRequestError: Invalid URL (POST /v1/edits)
+        openai.Edit.create(
+            model=cls.models_map[level],
+            input=text,
+            instruction=edit,
+            temperature=cls._get_temperature(creativity_risk=creativity_risk)
+        )
 
 
 class Dalle2:
-
 
     @classmethod
     def _check_img(cls, image: str) -> bool:
@@ -83,7 +96,7 @@ class Dalle2:
         return'url' if url_mode else 'b64_json'
 
     @classmethod
-    def create(cls, description: str, n: int = 1, size: str = 'L',
+    def create(cls, description: str, n: int = 1, size: str = 'S',
                url_mode: bool = False) -> tp.Union[bytes, tp.List[str]]:
 
         response = openai.Image.create(
@@ -121,6 +134,7 @@ class Dalle2:
             image=image,
             n=cls._get_n(n=n),
             size=cls._get_size(size=size),
-            response_format=self._get_format(url_mode=url_mode)
+            response_format=cls._get_format(url_mode=url_mode)
         )
         return [img['url'] for img in response['data']] if url_mode else response['data']
+
