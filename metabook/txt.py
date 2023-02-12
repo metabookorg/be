@@ -5,7 +5,7 @@ from .open_ai import GPT3
 
 class TxtCreator:
     def __init__(self, text_type: str = 'story',
-                 main_argument: str = None,
+                 argument: str = None,
                  environment: str = None,
                  time: tp.Union[str, list] = None,
                  characters: tp.List[str] = None,
@@ -13,15 +13,15 @@ class TxtCreator:
                  ):
         self.creativity_risk: float = creativity_risk
         self.text_type: str = text_type
-        self.main_argument: str | None = main_argument
+        self.argument: str | None = argument
         self.environment: str | None = environment
         self.time: tp.Union[str, list] | None = time
         self.characters: tp.List[str] | None = characters
 
     def _build_prompt(self):
         text_in = f"Tell me a {self.text_type}"
-        if self.main_argument:
-            text_in += f" about {self.main_argument}"
+        if self.argument:
+            text_in += f" about {self.argument}"
         if self.environment:
             text_in += f" set in {self.environment}"
         if self.time:
@@ -38,9 +38,14 @@ class TxtCreator:
             text_in += f" with the following characters: {self.characters[0]}"
             for character in self.characters[1:]:
                 text_in += f", {character}"
+        print(f"PROMPT: {text_in}")
         return text_in
 
-    def create(self):
+    def create_title(self) -> str:
+        prompt = self._build_prompt()
+        return prompt.replace("Tell me ", "").replace("", "").split("with")[0]
+
+    def create(self) -> str:
         text_in = self._build_prompt()
         print(f"\nTEXT IN:\n{text_in}")
         created = GPT3.create(text_in=text_in, creativity_risk=self.creativity_risk)

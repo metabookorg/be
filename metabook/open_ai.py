@@ -60,7 +60,7 @@ class GPT3:
         return response['choices'][0]['text']
 
     @classmethod
-    def edit(cls, text: str, edit: str, creativity_risk: float, level: int = 3):
+    def editNOTWORKING(cls, text: str, edit: str, creativity_risk: float, level: int = 3):
         # todo: gives openai.error.InvalidRequestError: Invalid URL (POST /v1/edits)
         openai.Edit.create(
             model=cls.models_map[level],
@@ -69,6 +69,18 @@ class GPT3:
             temperature=cls._get_temperature(creativity_risk=creativity_risk)
         )
 
+    @classmethod
+    def edit(cls, text: str, edit: str, creativity_risk: float, level: int = 3) -> str:
+        # todo: gives openai.error.InvalidRequestError: Invalid URL (POST /v1/edits)
+        prompt = f"{edit}: {text}"
+        print('PROMPT:')
+        print(prompt)
+        response = openai.Completion.create(
+            model=cls.models_map[level],
+            prompt=prompt,
+            temperature=cls._get_temperature(creativity_risk=creativity_risk)
+        )
+        return response['choices'][0]['text']
 
 class Dalle2:
 
