@@ -18,5 +18,5 @@ class BaseSettings(pdt.BaseSettings):
 
 
 class OpenAISettings(BaseSettings):
-    apikey: str = pdt.Field(env='OPENAI_APIKEY', default='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')
+    apikey: str = pdt.Field(env='OPENAI_APIKEY')
 
