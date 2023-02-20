@@ -41,9 +41,9 @@ class TxtCreator:
         print(f"PROMPT: {text_in}")
         return text_in
 
-    def create_title(self) -> str:
-        prompt = self._build_prompt()
-        return prompt.replace("Tell me ", "").replace("", "").split("with")[0]
+    def create_title(self, text: str) -> str:
+        prompt = f"Text:{text}\nTitle:"
+        return GPT3.create(text_in=prompt, level=0)
 
     def create(self) -> str:
         text_in = self._build_prompt()
@@ -56,10 +56,20 @@ class TxtCreator:
 
 
 class TxtAnalyzer:
-    def __init__(self, text: str | None):
+    def __init__(self, text: str):
         self.text: str = text
-        self.characters: list = list()
-        self.context: str| None = None
+        self.characters: tp.Dict[str, str] = dict()
+
+    def _characters(self):
+        prompt = f"Text:{self.text}\nList characters descriptions:"
+        raw = GPT3.create(text_in=prompt)
+        # TODO: place here replace for each line
+        lines = [el for el in raw.split('\n')]
+        characters = dict()
+        for l in lines:
+            splitted = l.split(':')
+            characters[splitted[0]] = splitted[1]
+        self.characters = characters
 
     def analyze(self):
         pass

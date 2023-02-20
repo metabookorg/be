@@ -41,7 +41,7 @@ class GPT3:
         return max(min(float(variability), 2), -2)
 
     @classmethod
-    def create(cls, text_in: str, creativity_risk: float,
+    def create(cls, text_in: str, creativity_risk: float = 0.5,
                level: int = 3, max_tokens: int = None, suffix: str = None, one_sentence_mode: bool = False,
                topic_variability: float = 0, word_variability: float = 0) -> str:
         # TODO: use logit_bias
