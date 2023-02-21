@@ -15,10 +15,10 @@ class BookCreator():
         self.imgs_creator.save()
 
     def create(self, save: bool = False, title: str = None, text: str = None) -> tp.List[PageUrl]:
-        if not title:
-            title = self.txt_creator.create_title()
         if not text:
             text = self.txt_creator.create()
+        if not title:
+            title = self.txt_creator.create_title(text=text)
         self.imgs_creator = self.imgs_creator_class(title=title, text=text)
         self.imgs_creator.create()
         if save:

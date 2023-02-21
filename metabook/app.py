@@ -9,6 +9,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 import asyncio
 import typing as tp
+from fastapi.middleware.cors import CORSMiddleware
 
 # # Package # #
 from .app_settings import AppSettings, RunAppSettings
@@ -21,6 +22,7 @@ __all__ = ("create", "run")
 
 def create(settings: AppSettings = AppSettings(),
            routers: tp.Tuple[APIRouter] | None = None,
+           add_cors: bool = True,
            mock_mode: bool = False) -> FastAPI:
     """Create app"""
     app = FastAPI(**settings.dict(exclude_none=True))
@@ -33,7 +35,13 @@ def create(settings: AppSettings = AppSettings(),
 
 
     # add middleware
-    app.middleware("http")(request_handler)
+    #app.middleware("http")(request_handler)
+    if add_cors:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["*"],
+        )
 
     return app
 

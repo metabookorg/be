@@ -8,7 +8,7 @@ from .models import PageUrl
 
 class ImgsCreator(abc.ABC):
 
-    def __init__(self, text: str, title: str, style: str):
+    def __init__(self, text: str, title: str, style: str = 'handmade'):
         self._txt: str = text
         self._title: str = title
         self._style: str = style

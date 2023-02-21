@@ -29,7 +29,7 @@ class BaseResponse(BaseModel):
 
 
 class NewKidBookRequest(BaseModel):
-    """Request of a brand new book for kids"""
+    """Request of a brand-new book for kids"""
     argument: str | None
     environment: str | None
     time: tp.Union[str, list] | None

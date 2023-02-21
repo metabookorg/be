@@ -4,9 +4,9 @@ Entry point to create app.
 """
 
 # # Package # #
-from metabook.app import create, run
-
+#from app import create, run
+import metabook.app as app
 
 if __name__ == '__main__':
     """Entry point: run app"""
-    run(app=create())
+    app.create_run()

@@ -37,20 +37,21 @@ async def welcome() -> str:
 
 @router.post(path='/new',
             tags=['new'],
-            summary='Create a brand new book for kids',
-            description='Create a brand new book for kids',
-            response_model=tp.List[PageUrl],
+            summary='Create a brand-new book for kids',
+            description='Create a brand-new book for kids',
+            response_model=NewKidBookResponse,
             responses={
                 200: {
                     "description": "Success",
                 },
             },
             response_model_by_alias=True)
-async def new(request: NewKidBookRequest) -> NewKidBookResponse:
+async def new(request: NewKidBookRequest | None = None) -> NewKidBookResponse:
     """Create a brand new fabulous book for kids"""
+    body = request.dict(exclude_none=True) if request else dict()
     creator = BookCreator(txt_creator=TxtCreator(text_type='kids story',
                                                  creativity_risk=0.5,
-                                                 **request.dict()))
+                                                 **body))
     return NewKidBookResponse(data=creator.create())
 
 
