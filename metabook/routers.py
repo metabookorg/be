@@ -48,6 +48,8 @@ async def welcome() -> str:
             response_model_by_alias=True)
 async def new(request: NewKidBookRequest | None = None) -> NewKidBookResponse:
     """Create a brand new fabulous book for kids"""
+    #TODO: per mockare il servizio decommentare la linea successiva
+    # return NewKidBookResponse(data=[PageUrl(txt='a pippa', idx=0, url='http://a:pippa/a/pippaaaaa')])
     body = request.dict(exclude_none=True) if request else dict()
     creator = BookCreator(txt_creator=TxtCreator(text_type='kids story',
                                                  creativity_risk=0.5,
