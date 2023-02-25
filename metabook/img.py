@@ -6,9 +6,12 @@ import requests as req
 
 from .models import PageUrl
 
+class ImgStyles:
+    pass
+
 class ImgsCreator(abc.ABC):
 
-    def __init__(self, text: str, title: str, style: str = 'handmade'):
+    def __init__(self, text: str, title: str, style: str = 'comic book'):
         self._txt: str = text
         self._title: str = title
         self._style: str = style
