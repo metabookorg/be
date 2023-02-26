@@ -14,24 +14,27 @@ from fastapi.middleware.cors import CORSMiddleware
 # # Package # #
 from .app_settings import AppSettings, RunAppSettings
 from .middlewares import request_handler
-from .routers import router
+from .routers import ROUTERS
 
 
 __all__ = ("create", "run")
 
 
-def create(settings: AppSettings = AppSettings(),
+def create(settings: AppSettings | None = None,
            routers: tp.Tuple[APIRouter] | None = None,
            add_cors: bool = True,
            mock_mode: bool = False) -> FastAPI:
     """Create app"""
+    if not isinstance(settings, AppSettings):
+        print("Using default application settings")
+        settings = AppSettings()
     app = FastAPI(**settings.dict(exclude_none=True))
 
     # check and add routers
     if not routers:
-        routers = [router]
+        routers = ROUTERS
     for rt in routers:
-        app.include_router(rt)
+        app.include_router(rt, prefix=settings.prefix)
 
 
     # add middleware

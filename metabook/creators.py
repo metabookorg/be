@@ -2,9 +2,10 @@ import typing as tp
 
 from .txt import TxtCreator, TxtAnalyzer
 from .img import ImgsCreator, NaiveImgsCreator, PageUrl
+from .prompts import *
 
 
-class BookCreator():
+class BookCreator:
     def __init__(self, txt_creator: TxtCreator = TxtCreator(),
                  imgs_creator_class: tp.Type[ImgsCreator] = NaiveImgsCreator):
         self.txt_creator: TxtCreator = txt_creator
@@ -14,12 +15,13 @@ class BookCreator():
     def save(self):
         self.imgs_creator.save()
 
-    def create(self, save: bool = False, title: str = None, text: str = None) -> tp.List[PageUrl]:
+    def create(self, save: bool = False, title: str = None, text: str = None,
+               style: str = IllustrationStyles.CYBERPUNK) -> tp.List[PageUrl]:
         if not text:
             text = self.txt_creator.create()
         if not title:
             title = self.txt_creator.create_title(text=text)
-        self.imgs_creator = self.imgs_creator_class(title=title, text=text)
+        self.imgs_creator = self.imgs_creator_class(title=title, text=text, style=style)
         self.imgs_creator.create()
         if save:
             self.save()

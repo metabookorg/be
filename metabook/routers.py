@@ -11,31 +11,31 @@ import asyncio
 from . import errors as err
 from .creators import BookCreator, TxtCreator
 from .img import PageUrl
-from .models import NewKidBookRequest, NewKidBookResponse
+from .models import NewKidBookRequest, NewKidBookResponse, NewPromptBookRequest
 
 
 #__all__ = ("build_routers")
 
-
+DEFAULT_TEXT_TYPE = 'kid story'
 
 ######################
 #   -   ROUTER   -   #
 ######################
 
-router: APIRouter = APIRouter(prefix='/metabook')
+new_router: APIRouter = APIRouter(prefix='/new')
 
 
-@router.get(path='/',
+@new_router.get(path='/',
             tags=['welcome'],
             summary='Welcome',
             description='Welcome',
             response_model=str)
 async def welcome() -> str:
     """Welcome service"""
-    return "Welcome to Metabooks!"
+    return "Welcome to Metabook's generation services"
 
 
-@router.post(path='/new',
+@new_router.post(path='/from_params',
             tags=['new'],
             summary='Create a brand-new book for kids',
             description='Create a brand-new book for kids',
@@ -46,14 +46,33 @@ async def welcome() -> str:
                 },
             },
             response_model_by_alias=True)
-async def new(request: NewKidBookRequest | None = None) -> NewKidBookResponse:
+async def from_params(request: NewKidBookRequest | None = None) -> NewKidBookResponse:
     """Create a brand new fabulous book for kids"""
-    #TODO: per mockare il servizio decommentare la linea successiva
-    #return NewKidBookResponse(data=[PageUrl(txt='a pippa', idx=0, url='http://a:pippa/a/pippaaaaa')])
-    body = request.dict(exclude_none=True) if request else dict()
-    creator = BookCreator(txt_creator=TxtCreator(text_type='kids story',
-                                                 creativity_risk=0.5,
-                                                 **body))
-    return NewKidBookResponse(data=creator.create())
+    if not request:
+        request = NewKidBookRequest()
+    creator = BookCreator(txt_creator=TxtCreator(txt_request=request.txt_request, creativity_risk=0.5))
+    # TODO: per mockare il servizio decommentare la linea successiva
+    # return NewKidBookResponse(data=[PageUrl(txt='a pippa', idx=0, url='http://a:pippa/a/pippaaaaa')])
+
+    return NewKidBookResponse(data=creator.create(style=request.style))
 
 
+@new_router.post(path='/from_prompt',
+            tags=['new'],
+            summary='Create a brand-new book for kids',
+            description='Create a brand-new book for kids',
+            response_model=NewKidBookResponse,
+            responses={
+                200: {
+                    "description": "Success",
+                },
+            },
+            response_model_by_alias=True)
+async def from_prompt(request: NewPromptBookRequest) -> NewKidBookResponse:
+    """Create a brand new fabulous book for kids"""
+    creator = BookCreator(txt_creator=TxtCreator(txt_request=request.txt_request, creativity_risk=0.5))
+    # TODO: per mockare il servizio decommentare la linea successiva
+    # return NewKidBookResponse(data=[PageUrl(txt='a pippa', idx=0, url='http://a:pippa/a/pippaaaaa')])
+    return NewKidBookResponse(data=creator.create(style=request.style))
+
+ROUTERS = [new_router]

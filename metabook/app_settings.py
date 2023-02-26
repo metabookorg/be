@@ -27,6 +27,7 @@ class AppSettings(BaseSettings):
     title: str = "Metabook"
     description: str = "Create fabulous books 4 kids"
     version: str = "0.0.1"
+    prefix: str = '/metabook'
     contact: tp.Dict[str, tp.Any] = {
         "email": "matteocausio@yahoo"
     }

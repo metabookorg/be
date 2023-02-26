@@ -30,7 +30,7 @@ class GPT3:
 
     @classmethod
     def _get_temperature(cls, creativity_risk: float) -> float:
-        return max(min(float(creativity_risk), 1), 0)
+        return max(min(float(creativity_risk), 1.0), 0.0)
 
     @classmethod
     def _get_stop(cls, one_sentence_mode: bool) -> str | None:
