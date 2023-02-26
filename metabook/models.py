@@ -93,5 +93,5 @@ class NewKidBookRequest(NewBookRequest):
     txt_request: ParamTxtRequest = ParamTxtRequest(type='kids story')
 
 
-class NewKidBookResponse(BaseModel):
+class BookUrlsResponse(BaseResponse):
     data: tp.List[PageUrl]
