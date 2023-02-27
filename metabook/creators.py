@@ -2,7 +2,7 @@ import typing as tp
 
 from .txt import TxtCreator, TxtAnalyzer
 from .img import ImgsCreator, NaiveImgsCreator, PageUrl
-from .prompts import *
+from .static import ImgStyle
 
 
 class BookCreator:
@@ -16,7 +16,7 @@ class BookCreator:
         self.imgs_creator.save()
 
     def create(self, save: bool = False, title: str = None, text: str = None,
-               style: str = IllustrationStyles.CYBERPUNK) -> tp.List[PageUrl]:
+               style: str = ImgStyle.CYBERPUNK.value) -> tp.List[PageUrl]:
         if not text:
             text = self.txt_creator.create()
         if not title:

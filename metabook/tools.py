@@ -19,7 +19,7 @@ class BookLoader:
         draw.text(xy=(0, 0), text=text)
 
     @classmethod
-    def from_urls(cls, book: tp.List[PageUrl], raise_mode: bool = False) -> tp.List[Image]:
+    def from_urls(cls, book: tp.List[PageUrl], raise_mode: bool = False) -> tp.List[Image.Image]:
         book.sort(key=lambda x: x.idx)
         images = list()
         for img_url in book:
@@ -37,7 +37,7 @@ class BookLoader:
 
 class Exporter:
     @classmethod
-    def to_pdf(cls, book: tp.List[Image], title: str = None) -> StringIO:
+    def to_pdf(cls, book: tp.List[Image.Image], title: str = None) -> StringIO:
         img_io = StringIO()
         book[0].save(
             img_io, "PDF", resolution=100.0, save_all=True, append_images=book[1:],

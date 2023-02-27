@@ -13,6 +13,7 @@ from .creators import BookCreator, TxtCreator
 from .img import PageUrl
 from .models import NewKidBookRequest, BookUrlsResponse, NewPromptBookRequest
 from .tools import BookLoader, Exporter
+from .static import ImgStyle
 
 #__all__ = ("build_routers")
 
@@ -75,25 +76,25 @@ async def from_prompt(request: NewPromptBookRequest) -> BookUrlsResponse:
     return BookUrlsResponse(data=creator.create(style=request.style))
 
 
-export_router: APIRouter = APIRouter(prefix='/export')
+
+static_router: APIRouter = APIRouter(prefix='/static')
 
 
-@new_router.get(path='/pdf',
-            tags=['pdf'],
+@static_router.get(path='/img_styles',
+            tags=['style'],
             summary='Export book as PDF',
             description='Export book as PDF',
-            response_model=BookUrlsResponse,
+            response_model=tp.List[ImgStyle],
             responses={
                 200: {
                     "description": "Success",
                 },
             },
             response_model_by_alias=True)
-async def to_pdf(book: tp.List[PageUrl]) -> StringIO:
+async def get_img_styles() -> tp.List[ImgStyle]:
     """Create a brand new fabulous book for kids"""
-    loaded = BookLoader.from_urls(book=book, raise_mode=True)
-
-    return Exporter.to_pdf(book=loaded)
+    return list(ImgStyle)
 
 
-ROUTERS = [new_router, export_router]
+
+ROUTERS = [new_router, static_router]#, export_router]

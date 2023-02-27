@@ -72,33 +72,32 @@ def run1():
 
 if __name__ == '__main__':
     story = [
-        "Once upon a time, there was a kid named Pit and his trusty dog, Rover"
-        "Pit was quite the adventurous type and always looking for a new challenge"
-        "One day, Pit and Rover were walking through the forest when they stumbled upon a strange portal"
-        "When Pit looked inside the portal, he saw a world unlike anything he had ever seen before"
-        "It was a world of advanced technology, far in the future"
-        "Pit and Rover decided to take a chance and jumped in"
-        "When they arrived in the future world, they were greeted by an AI bot"
-        "The AI bot told them that they had been chosen to take part in an extreme adventure"
-        "The AI bot explained that the adventure would take them to different parts of the world, and that they would have to complete various tasks in order to succeed"
-        "Pit and Rover were both excited and scared at the same time"
-        "Pit and Rover set out on their adventure, and they were amazed by the things they saw and the places they went"
-        "They encountered robots, aliens, and other strange creatures"
-        "They also faced many dangers and had to use their wits to survive"
-        "After a long and difficult journey, Pit and Rover finally reached the end of their adventure"
-        "They had succeeded in their mission and were rewarded with a huge amount of treasure"
-        "Pit and Rover returned home with their bounty and shared their amazing story with everyone"
-        "From that day on, they were known as the bravest adventurers in the world"
+        "Once upon a time, there was a kid named Pit and his trusty dog, Rover",
+        "Pit was quite the adventurous type and always looking for a new challenge",
+        "One day, Pit and Rover were walking through the forest when they stumbled upon a strange portal",
+        "When Pit looked inside the portal, he saw a world unlike anything he had ever seen before",
+        "It was a world of advanced technology, far in the future",
+        "Pit and Rover decided to take a chance and jumped in",
+        "When they arrived in the future world, they were greeted by an AI bot",
+        "The AI bot told them that they had been chosen to take part in an extreme adventure",
+        "The AI bot explained that the adventure would take them to different parts of the world, and that they would have to complete various tasks in order to succeed",
+        "Pit and Rover were both excited and scared at the same time",
+        "Pit and Rover set out on their adventure, and they were amazed by the things they saw and the places they went",
+        "They encountered robots, aliens, and other strange creatures",
+        "They also faced many dangers and had to use their wits to survive",
+        "After a long and difficult journey, Pit and Rover finally reached the end of their adventure",
+        "They had succeeded in their mission and were rewarded with a huge amount of treasure",
+        "Pit and Rover returned home with their bounty and shared their amazing story with everyone",
+        "From that day on, they were known as the bravest adventurers in the world",
         ]
 
     #analyzer = TxtAnalyzer(text='. '.join(story))
     #analyzer.analyze()
     #for k, v in analyzer.characters.items():
     #    print(f"{k}: {v}")
-    sentence1 = 'One day, Pit and Rover were walking through the forest when they stumbled upon a strange portal.'
-    sentence2 = 'When Pit looked inside the portal, he saw a world unlike anything he had ever seen before'
-    text = f"Text:{sentence1}"#\nPit: A young boy with brown hair and eyes, wearing a red t-shirt and blue jeans."#\nRover: A loyal black and white dog with floppy ears and a wagging tail."
-    suffix = "Create a one sentence illustration description from the text"
-    "Pit and Rover are standing in front of a swirling blue portal in the middle of a forest. The trees around them are tall and lush, and the portal is emitting a bright light. They are both looking at the portal in awe and amazement"
-    #"With curiosity and excitement, Pit and Rover ventured into the mysterious forest, where they discovered a mysterious portal that seemed to lead to a new world."
-    print(GPT3.create(text_in=text, suffix=suffix, creativity_risk=0.0))
+    text = '. '.join(story)#[f'{idx}. {el}.\n' for idx, el in enumerate(story)])
+    prompt = '.\n '.join([f'{idx}. {el}' for idx, el in enumerate(story)])#f"Text:{text}"
+    print(prompt)
+    suffix = 'For each numbered sentence list all the characters in it.'
+    print('RESULTS:\n')
+    print(GPT3.create(text_in=prompt, suffix=suffix, creativity_risk=0.2))

@@ -10,7 +10,8 @@ import pydantic as pdt
 import typing as tp
 
 # # Package
-from .prompts import *
+from .static import ImgStyle
+
 
 class BaseModel(pdt.BaseModel):
     "Base model"
@@ -80,7 +81,7 @@ class ParamKidBookRequest:
 
 class NewBookRequest(BaseModel):
     """Request of a brand-new book for kids"""
-    style: str = IllustrationStyles.DISNEY_OLD
+    style: str = ImgStyle.DISNEY_OLD.value
     txt_request: BaseTxtRequest
 
 
