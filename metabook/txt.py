@@ -1,5 +1,4 @@
 import typing as tp
-
 from .open_ai import GPT3
 from .models import *
 
@@ -18,11 +17,10 @@ class TxtCreator:
 
     def create_title(self, text: str) -> str:
         prompt = f"Text:{text}\nTitle:"
-        return GPT3.create(text_in=prompt, level=0)
+        return GPT3.create(text_in=prompt, level=0).replace('\n', '').replace('.', '')
 
     def create(self) -> str:
         text_in = self.request.get_prompt()
-        print(f"\nTEXT IN:\n{text_in}")
         created = GPT3.create(text_in=text_in, creativity_risk=self.creativity_risk)
         print(f"\nCREATED:\n{created}")
 
@@ -30,18 +28,25 @@ class TxtCreator:
 
 
 class TxtAnalysis(pdt.BaseModel):
-    text: str
     characters: tp.Dict[str, str]
     sentences: tp.Dict[int, str]
     sentence_characters: tp.Dict[int, tp.List[str]]
 
 
 class TxtAnalyzer:
+
     @classmethod
     def _characters(cls, text: str) -> tp.Dict[str, str]:
-        prompt = f"Text:{text}\nList characters visual descriptions:"
-        raw = GPT3.create(text_in=prompt)
-        print(f"RAW CHARACTERS:\n{raw}")
+        prompt = "List characters visual one sentence descriptions.\nExample:\n"
+        prompt += "Text:\n"
+        prompt += "Rod and Tod start to smoke some weed. "
+        prompt += "After a while they began to see some weird creatures and a fairy castle.\n"
+        prompt += "Characters:\n"
+        prompt += "Rod: A tall, thin teenage boy with shaggy brown hair and bright blue eyes wearing a faded t-shirt and ripped jeans.\n"
+        prompt += "Tod: A short, stocky teenage boy with spiky blond hair and dark brown eyes wearing a black hoodie and baggy sweatpants.\n"
+        prompt += "Creatures: Strange, alien-like creatures with long, spindly limbs and glowing eyes.\n"
+        prompt = f"Text:\n{text}\nCharacters:\n"
+        raw = GPT3.create(text_in=prompt).replace('- ', '')
         # TODO: place here replace for each line
         lines = [el for el in raw.split('\n')]
         characters = dict()
@@ -52,33 +57,52 @@ class TxtAnalyzer:
         return characters
 
     @classmethod
-    def _sentences(cls, text: str) -> tp.Dict[int, str]:
-        return {idx: splitted for idx, splitted in enumerate(text.replace('\n', '').split('.'))}
+    def _sentences(cls, text: str, title: str) -> tp.Dict[int, str]:
+        sentences = {0: title.replace('\n', '').replace('.', '')}
+        for splitted in text.replace('\n', '').split('.'):
+            if splitted != '':
+                idx = len(sentences)
+                sentences[idx] = splitted
+        return sentences
 
     @classmethod
     def _sentence_chars(cls, sentences: tp.Dict[int, str]) -> tp.Dict[int, tp.List[str]]:
-        prompt = '.\n'.join([f'{idx}. {line}' for idx, line in sentences.items()]) + '.\n'
-        suffix = 'For each numbered sentence list all the characters in it.'
-        raw = GPT3.create(text_in=prompt, suffix=suffix, creativity_risk=0.2)
+        prompt = 'For each numbered sentence list all the living characters in it.\n'
+        prompt += 'Example:\nSentences:\n'
+        prompt += '0. Rod and Tod start to smoke some weed.\n'
+        prompt += '1. After a while they began to see some weird creatures and a fairy castle.\n'
+        prompt += 'Characters:\n'
+        prompt += '0. Rod, Tod\n'
+        prompt += '1. Rod, Tod, creatures\n'
+        prompt += 'Sentences:\n'
+        prompt += '\n'.join([f'{idx}. {line}.' for idx, line in sentences.items()])
+        prompt += '.\nCharacters:\n'
+
+        #TODO: DOES NOT WORK ALWAYS
+        raw = GPT3.create(text_in=prompt, creativity_risk=0.2)
         lines = [el for el in raw.split('\n')]
         sentence_chars = dict()
         for l in lines:
             splitted = l.split('. ')
             if len(splitted) == 2:
-                chars = [el for el in splitted[1].split(', ') if el != 'None']
+                chars = [el.replace('.', '') for el in splitted[1].split(', ') if el != 'None']
                 sentence_chars[int(splitted[0])] = chars
         return sentence_chars
 
 
     @classmethod
-    def analyze(cls, text: str) -> TxtAnalysis:
+    def analyze(cls, text: str, title: str) -> TxtAnalysis:
         characters = cls._characters(text=text)
-        sentences = cls._sentences(text=text)
+        sentences = cls._sentences(text=text, title=title)
         sentence_chars = cls._sentence_chars(sentences=sentences)
         if len(sentences.keys()) != len(sentence_chars.keys()):
             raise Exception(f"Sentences lenght (={len(sentences.keys())} differs from "
                             f"Sentence-characters lenght (={len(sentence_chars.keys())}")
-        return TxtAnalysis(characters=characters, sentences=sentences, sentence_chars=sentence_chars)
+        print('ANALISYS:\n')
+        print(f"CHARS:\n{characters}\n")
+        print(f"CHARS:\n{sentence_chars}\n")
+        return TxtAnalysis(characters=characters, sentences=sentences, sentence_characters=sentence_chars)
+
 
 class PagePrompt:
     def __init__(self, idx: int, txt: str, prompt: str):
@@ -88,30 +112,33 @@ class PagePrompt:
 
 
 class BookPromptsCreator:
-    def get_current_chars(self, sentence: str, characters: tp.Dict[str, str]) -> tp.List[str]:
-        selected = list()
-        for char in characters.keys():
-            if char in sentence:
-                selected.append(char)
+    @classmethod
+    def get_current_chars(cls, sentence_characters: tp.List[str], chars_descriptions: tp.Dict[str, str]) -> tp.Dict[str, str]:
+        selected = dict()
+        for name in sentence_characters:
+            for long_name, description in chars_descriptions.items():
+                if name in long_name:
+                    selected[name] = description
         return selected
 
-    def _create_cover_prompt(self, title: str) -> PagePrompt:
+    @classmethod
+    def _create_cover_prompt(cls, title: str) -> PagePrompt:
         return PagePrompt(idx=0, txt=title, prompt=title)
 
-    def create(self, text: str, title: str, style: str) -> tp.List[PagePrompt]:
-        analysis = TxtAnalyzer.analyze(text=text)
+    @classmethod
+    def create(cls, text: str, title: str, style: str) -> tp.List[PagePrompt]:
+        analysis = TxtAnalyzer.analyze(text=text, title=title)
         suffix = "Create an illustration description from the text"
         prompt_list = list()
-        # TODO: ADD COVER WITH TITLE
-        prompt_list.append(self._create_cover_prompt(title=title))
         for idx, line in analysis.sentences.items():
-            description = GPT3.create(text_in=f"Text:{line}", suffix=suffix, creativity_risk=0.0,
+            img_description = GPT3.create(text_in=f"Text:{line}\n{suffix}", creativity_risk=0.0,
                                       one_sentence_mode=True)
-            characters = [char for char in analysis.sentence_characters[idx] if char in analysis.characters.keys()]
+            current_chars = cls.get_current_chars(sentence_characters=analysis.sentence_characters[idx],
+                                                  chars_descriptions=analysis.characters)
             prompt = ""
-            for char in characters:
-                prompt += f"{char} {analysis.characters[char]}, "
-            prompt = f"{prompt}, {description}, {style} style"
+            for name, description in current_chars.items():
+                prompt += f"{name},{description}; "
+            prompt += f"{img_description}; in {style} style"
             prompt_list.append(PagePrompt(idx=idx + 1, txt=line, prompt=prompt))
         return prompt_list
 

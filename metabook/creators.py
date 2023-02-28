@@ -21,6 +21,8 @@ class BookCreator:
             text = self.txt_creator.create()
         if not title:
             title = self.txt_creator.create_title(text=text)
+            print(f"\nTITLE:\n{title}")
+
         self.imgs_creator = self.imgs_creator_class(title=title, text=text, style=style)
         self.imgs_creator.create()
         if save:

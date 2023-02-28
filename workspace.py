@@ -95,9 +95,4 @@ if __name__ == '__main__':
     #analyzer.analyze()
     #for k, v in analyzer.characters.items():
     #    print(f"{k}: {v}")
-    text = '. '.join(story)#[f'{idx}. {el}.\n' for idx, el in enumerate(story)])
-    prompt = '.\n '.join([f'{idx}. {el}' for idx, el in enumerate(story)])#f"Text:{text}"
-    print(prompt)
-    suffix = 'For each numbered sentence list all the characters in it.'
-    print('RESULTS:\n')
-    print(GPT3.create(text_in=prompt, suffix=suffix, creativity_risk=0.2))
+    print(Dalle2.create(description='a penis', url_mode=True))

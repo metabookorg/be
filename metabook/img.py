@@ -5,6 +5,7 @@ from .open_ai import Dalle2
 import requests as req
 
 from .models import PageUrl
+from .txt import BookPromptsCreator
 
 class ImgStyles:
     pass
@@ -47,19 +48,14 @@ class NaiveImgsCreator(ImgsCreator):
             except Exception as e:
                 print(f"Exception in saving {img_url.txt} image: {e}")
 
-    def _build_prompt(self, text: str) -> str:
-        return f"{text}. Style:{self._style}"
-
     def create(self):
-        splitted = self._split_phrases()
-        for idx, splitted in enumerate(splitted):
+        page_prompt_list = BookPromptsCreator.create(text=self._txt, title=self._title, style=self._style)
+        for page_prompt in page_prompt_list:
             try:
-                if splitted:
-                    prompt = self._build_prompt(text=splitted)
-                    print(f"TEXT: {prompt}")
-                    url = Dalle2.create(description=prompt, url_mode=True, n=1)[0]
-                    print(f"URL: {url}")
-                    self.images_urls.append(PageUrl(txt=splitted, idx=idx, url=url))
+                print(f"TEXT: {page_prompt.prompt}")
+                url = Dalle2.create(description=page_prompt.prompt, url_mode=True, n=1)[0]
+                print(f"URL: {url}")
+                self.images_urls.append(PageUrl(txt=page_prompt.txt, idx=page_prompt.idx, url=url))
             except Exception as e:
                 print(f"ERROR: {e}")
         print(f"Pics successfully created.")
