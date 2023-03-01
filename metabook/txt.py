@@ -150,10 +150,10 @@ class BookPromptsCreator:
                                                   chars_descriptions=analysis.characters)
             prompt = ""
             if style:
-                prompt += f"{style.capitalize()} "
+                prompt += f"{style.capitalize()} illustration; "
             else:
-                prompt += f"An "
-            prompt += f"{style if style} illustration of {img_description}"
+                prompt += f"An illustration; "
+            prompt += f"{img_description}; "
             for name, description in current_chars.items():
                 prompt += f"; {name}, {description}"
             prompt_list.append(PagePrompt(idx=idx + 1, txt=line, prompt=prompt))
