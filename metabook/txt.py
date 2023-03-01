@@ -156,7 +156,7 @@ class BookPromptsCreator:
             prompt += f"{img_description}; "
             for name, description in current_chars.items():
                 prompt += f"; {name}, {description}"
-            prompt_list.append(PagePrompt(idx=idx + 1, txt=line, prompt=prompt))
+            prompt_list.append(PagePrompt(idx=idx, txt=line, prompt=prompt))
         return prompt_list
 
 
