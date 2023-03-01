@@ -4,20 +4,23 @@ import os
 from .open_ai import Dalle2
 import requests as req
 
-from .models import PageUrl
+
+from .models import PageUrl, Story
 from .txt import BookPromptsCreator
+from . import errors as err
 
 class ImgStyles:
     pass
 
-class ImgsCreator(abc.ABC):
+class BaseImgsCreator(abc.ABC):
 
-    def __init__(self, text: str, title: str, style: str = 'comic book'):
-        self._txt: str = text
-        self._title: str = title
+    def __init__(self, story: Story, style: str = 'comic book'):
+        if not isinstance(story, Story):
+            raise Exception('story must be instance story')
+        self._story: Story = story
         self._style: str = style
         self.images_urls: tp.List[PageUrl] = list()
-        self._folder_path: str = os.path.join(".results", self._title)
+        self._folder_path: str = os.path.join(".results", self._story.title)
 
     @abc.abstractmethod
     def save(self):
@@ -28,16 +31,11 @@ class ImgsCreator(abc.ABC):
         pass
 
 
-class NaiveImgsCreator(ImgsCreator):
+class ImgsCreator(BaseImgsCreator):
     _EXTENSION: str = 'png'
 
-    def _split_phrases(self) -> tp.List[str]:
-        raw = self._txt
-        raw = raw.replace("\n", "").replace("\r", "")
-        return raw.split(".")
-
     def save(self):
-        folder = os.path.join("workspace", "results", self._title)
+        folder = os.path.join("workspace", "results", self._story.title)
         os.makedirs(folder)
         for img_url in self.images_urls:
             try:
@@ -49,7 +47,7 @@ class NaiveImgsCreator(ImgsCreator):
                 print(f"Exception in saving {img_url.txt} image: {e}")
 
     def create(self):
-        page_prompt_list = BookPromptsCreator.create(text=self._txt, title=self._title, style=self._style)
+        page_prompt_list = BookPromptsCreator.create(text=self._story.text, title=self._story.title, style=self._style)
         for page_prompt in page_prompt_list:
             try:
                 print(f"TEXT: {page_prompt.prompt}")

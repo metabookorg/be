@@ -20,6 +20,11 @@ class BaseModel(pdt.BaseModel):
         arbitrary_types_allowed = True
 
 
+class Story(BaseModel):
+    title: str
+    text: str
+
+
 class PageUrl(BaseModel):
     txt: str
     idx: int
@@ -33,15 +38,28 @@ class BaseResponse(BaseModel):
 
 
 class BaseTxtRequest(abc.ABC, BaseModel):
-    @abc.abstractmethod
     def get_prompt(self) -> str:
+        prompt = self._prompt().capitalize()
+        prompt += ' with a title.\nExample:\n'
+        prompt += 'Title: The Strange Adventures of Rod and Tod.\n'
+        prompt += 'Text:\n'
+        prompt += 'Rod and Tod start to smoke some weed.\n'
+        prompt += 'After a while they began to see some weird creatures and a fairy castle.\n'
+        prompt += 'Title: \n'
+        prompt += 'Text:\n'
+        print(f"TEXT REQUEST PROMPT:\n{prompt}\n")
+
+        return prompt
+
+    @abc.abstractmethod
+    def _prompt(self) -> str:
         pass
 
 
 class PromptTxtRequest(BaseTxtRequest):
     prompt: str
 
-    def get_prompt(self) -> str:
+    def _prompt(self) -> str:
         return self.prompt
 
 
@@ -52,7 +70,7 @@ class ParamTxtRequest(BaseTxtRequest):
     time: tp.Union[str, list] | None
     characters: tp.List[str] | None
 
-    def get_prompt(self) -> str:
+    def _prompt(self) -> str:
         text_in = f"Tell me a {self.type}"
         if self.argument:
             text_in += f" about {self.argument}"
@@ -72,7 +90,6 @@ class ParamTxtRequest(BaseTxtRequest):
             text_in += f" with the following characters: {self.characters[0]}"
             for character in self.characters[1:]:
                 text_in += f", {character}"
-        print(f"PROMPT: {text_in}")
         return text_in
 
 class ParamKidBookRequest:

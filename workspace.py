@@ -95,3 +95,12 @@ if __name__ == '__main__':
     #analyzer.analyze()
     #for k, v in analyzer.characters.items():
     #    print(f"{k}: {v}")
+    prompt = 'Tell me a story with a title.\nExample:\n'
+    prompt += 'Title: The Strange Adventures of Rod and Tod.\n'
+    prompt += 'Text:\n'
+    prompt += 'Rod and Tod start to smoke some weed.\n'
+    prompt += 'After a while they began to see some weird creatures and a fairy castle.\n'
+    prompt += 'Title: \n'
+    prompt += 'Text:\n'
+
+    print(GPT3.create(text_in=prompt))

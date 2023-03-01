@@ -14,17 +14,17 @@ class TxtCreator:
         self.request: BaseTxtRequest = txt_request if txt_request else ParamTxtRequest()
         self.creativity_risk: float = creativity_risk
 
-
-    def create_title(self, text: str) -> str:
-        prompt = f"Text:{text}\nTitle:"
-        return GPT3.create(text_in=prompt, level=0).replace('\n', '').replace('.', '')
-
-    def create(self) -> str:
+    def create(self) -> Story:
         text_in = self.request.get_prompt()
         created = GPT3.create(text_in=text_in, creativity_risk=self.creativity_risk)
-        print(f"\nCREATED:\n{created}")
-
-        return created
+        print(f'CREATED:\n{created}')
+        paragraphs = created.split('\n')
+        title = paragraphs[0].replace('.', '')
+        lines = list()
+        for parag in paragraphs[1:]:
+            lines += [l[1:] if l and l[0] == ' ' else l for l in parag.split('.')]
+        lines = [l for l in lines if l and l.replace(' ', '') and len(l) > 4]
+        return Story(title=title, text='. '.join(lines))
 
 
 class TxtAnalysis(pdt.BaseModel):
@@ -63,11 +63,10 @@ class TxtAnalyzer:
 
     @classmethod
     def _sentences(cls, text: str, title: str) -> tp.Dict[int, str]:
-        sentences = {0: title.replace('\n', '').replace('.', '')}
-        for line in text.replace('\n', '').split('.'):
-            if line != '' and len(line) > 4:
-                idx = len(sentences)
-                sentences[idx] = line.lower()
+        sentences = {0: title}
+        for line in text.split('.'):
+            idx = len(sentences)
+            sentences[idx] = line.lower()
         return sentences
 
     @classmethod
@@ -140,10 +139,10 @@ class BookPromptsCreator:
     @classmethod
     def create(cls, text: str, title: str, style: str) -> tp.List[PagePrompt]:
         analysis = TxtAnalyzer.analyze(text=text, title=title)
-        suffix = "Create an illustration description from the text"
+        prefix = "Create an illustration description from the text."
         prompt_list = list()
         for idx, line in analysis.sentences.items():
-            img_description = GPT3.create(text_in=f"Text:{line}\n{suffix}", creativity_risk=0.0,
+            img_description = GPT3.create(text_in=f"{prefix}\nText:{line}\n", creativity_risk=0.0,
                                           one_sentence_mode=True).replace('\n', '')
             img_description = cls.clean_description(description=img_description)
             current_chars = cls.get_current_chars(sentence_characters=analysis.sentence_characters[idx],
@@ -153,7 +152,7 @@ class BookPromptsCreator:
                 prompt += f"{style.capitalize()} illustration; "
             else:
                 prompt += f"An illustration; "
-            prompt += f"{img_description}; "
+            prompt += f"{img_description}"
             for name, description in current_chars.items():
                 prompt += f"; {name}, {description}"
             prompt_list.append(PagePrompt(idx=idx, txt=line, prompt=prompt))
