@@ -37,7 +37,7 @@ class TxtAnalyzer:
 
     @classmethod
     def _characters(cls, text: str) -> tp.Dict[str, str]:
-        prompt = "List characters visual descriptions.\nExample:\n"
+        prompt = "List characters aspect descriptions.\nExample:\n"
         prompt += "Text:\n"
         prompt += "Rod and Tod start to smoke some weed. "
         prompt += "After a while they began to see some weird creatures and a fairy castle.\n"
@@ -45,11 +45,12 @@ class TxtAnalyzer:
         prompt += "Rod: A tall, thin teenage boy with shaggy brown hair and bright blue eyes wearing a faded t-shirt and ripped jeans.\n"
         prompt += "Tod: A short, stocky teenage boy with spiky blond hair and dark brown eyes wearing a black hoodie and baggy sweatpants.\n"
         prompt += "Creatures: Strange, alien-like creatures with long, spindly limbs and glowing eyes.\n"
-        prompt = f"Text:\n{text}\nCharacters:\n"
+        prompt += f"Text:\n{text}\nCharacters:\n"
         raw = GPT3.create(text_in=prompt).replace('- ', '').replace('-', '')
         # TODO: place here replace for each line
         lines = [el for el in raw.split('\n')]
         characters = dict()
+        print(f'DESCRIPTIONS: {lines}')
         for l in lines:
             splitted = l.split(':')
             if len(splitted) == 2:
@@ -130,6 +131,13 @@ class BookPromptsCreator:
         return PagePrompt(idx=0, txt=title, prompt=title)
 
     @classmethod
+    def clean_description(cls, description: str) -> str:
+        description = description.lower().replace('.', '').replace('illustration:', '')
+        description = description.replace('an illustration of ', '').replace('illustration of ', '')
+        description = description.replace('an illustration ', '').replace('illustration ', '')
+        return description
+
+    @classmethod
     def create(cls, text: str, title: str, style: str) -> tp.List[PagePrompt]:
         analysis = TxtAnalyzer.analyze(text=text, title=title)
         suffix = "Create an illustration description from the text"
@@ -137,10 +145,15 @@ class BookPromptsCreator:
         for idx, line in analysis.sentences.items():
             img_description = GPT3.create(text_in=f"Text:{line}\n{suffix}", creativity_risk=0.0,
                                           one_sentence_mode=True).replace('\n', '')
-            img_description = img_description.replace('.', '').lower().replace('an illustration of ', '')
+            img_description = cls.clean_description(description=img_description)
             current_chars = cls.get_current_chars(sentence_characters=analysis.sentence_characters[idx],
                                                   chars_descriptions=analysis.characters)
-            prompt = f"{style} illustration of {img_description}"
+            prompt = ""
+            if style:
+                prompt += f"{style.capitalize()} "
+            else:
+                prompt += f"An "
+            prompt += f"{style if style} illustration of {img_description}"
             for name, description in current_chars.items():
                 prompt += f"; {name}, {description}"
             prompt_list.append(PagePrompt(idx=idx + 1, txt=line, prompt=prompt))
