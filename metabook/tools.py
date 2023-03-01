@@ -37,8 +37,8 @@ class BookLoader:
 
 class Exporter:
     @classmethod
-    def to_pdf(cls, book: tp.List[Image.Image], title: str = None) -> StringIO:
-        img_io = StringIO()
+    def to_pdf(cls, book: tp.List[Image.Image], title: str = None) -> BytesIO:
+        img_io = BytesIO()
         book[0].save(
             img_io, "PDF", resolution=100.0, save_all=True, append_images=book[1:],
             # title="Friendly Title", author="Mark", subject="Friendly Subject"

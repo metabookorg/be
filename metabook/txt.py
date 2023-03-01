@@ -37,7 +37,7 @@ class TxtAnalyzer:
 
     @classmethod
     def _characters(cls, text: str) -> tp.Dict[str, str]:
-        prompt = "List characters visual one sentence descriptions.\nExample:\n"
+        prompt = "List characters visual descriptions.\nExample:\n"
         prompt += "Text:\n"
         prompt += "Rod and Tod start to smoke some weed. "
         prompt += "After a while they began to see some weird creatures and a fairy castle.\n"
@@ -46,23 +46,27 @@ class TxtAnalyzer:
         prompt += "Tod: A short, stocky teenage boy with spiky blond hair and dark brown eyes wearing a black hoodie and baggy sweatpants.\n"
         prompt += "Creatures: Strange, alien-like creatures with long, spindly limbs and glowing eyes.\n"
         prompt = f"Text:\n{text}\nCharacters:\n"
-        raw = GPT3.create(text_in=prompt).replace('- ', '')
+        raw = GPT3.create(text_in=prompt).replace('- ', '').replace('-', '')
         # TODO: place here replace for each line
         lines = [el for el in raw.split('\n')]
         characters = dict()
         for l in lines:
             splitted = l.split(':')
             if len(splitted) == 2:
-                characters[splitted[0]] = splitted[1]
+                name = splitted[0].lower()
+                descr = splitted[1].split('.')[0].lower()
+                if descr[0] == ' ':
+                    descr = descr[1: ]
+                characters[name] = descr
         return characters
 
     @classmethod
     def _sentences(cls, text: str, title: str) -> tp.Dict[int, str]:
         sentences = {0: title.replace('\n', '').replace('.', '')}
-        for splitted in text.replace('\n', '').split('.'):
-            if splitted != '':
+        for line in text.replace('\n', '').split('.'):
+            if line != '' and len(line) > 4:
                 idx = len(sentences)
-                sentences[idx] = splitted
+                sentences[idx] = line.lower()
         return sentences
 
     @classmethod
@@ -85,7 +89,7 @@ class TxtAnalyzer:
         for l in lines:
             splitted = l.split('. ')
             if len(splitted) == 2:
-                chars = [el.replace('.', '') for el in splitted[1].split(', ') if el != 'None']
+                chars = [el.replace('. ', '').replace('.', '').lower() for el in splitted[1].split(', ') if el != 'None']
                 sentence_chars[int(splitted[0])] = chars
         return sentence_chars
 
@@ -132,13 +136,13 @@ class BookPromptsCreator:
         prompt_list = list()
         for idx, line in analysis.sentences.items():
             img_description = GPT3.create(text_in=f"Text:{line}\n{suffix}", creativity_risk=0.0,
-                                      one_sentence_mode=True)
+                                          one_sentence_mode=True).replace('\n', '')
+            img_description = img_description.replace('.', '').lower().replace('an illustration of ', '')
             current_chars = cls.get_current_chars(sentence_characters=analysis.sentence_characters[idx],
                                                   chars_descriptions=analysis.characters)
-            prompt = ""
+            prompt = f"{style} illustration of {img_description}"
             for name, description in current_chars.items():
-                prompt += f"{name},{description}; "
-            prompt += f"{img_description}; in {style} style"
+                prompt += f"; {name}, {description}"
             prompt_list.append(PagePrompt(idx=idx + 1, txt=line, prompt=prompt))
         return prompt_list
 

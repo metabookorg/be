@@ -95,4 +95,3 @@ if __name__ == '__main__':
     #analyzer.analyze()
     #for k, v in analyzer.characters.items():
     #    print(f"{k}: {v}")
-    print(Dalle2.create(description='a penis', url_mode=True))

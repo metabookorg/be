@@ -6,6 +6,7 @@ Building and implementation of Api Router (services exposed by the app).
 from io import StringIO
 from fastapi import APIRouter
 import typing as tp
+from fastapi.responses import FileResponse
 
 # # Package # #
 from . import errors as err
@@ -96,5 +97,27 @@ async def get_img_styles() -> tp.List[ImgStyle]:
     return list(ImgStyle)
 
 
+export_router: APIRouter = APIRouter(prefix='/export')
 
-ROUTERS = [new_router, static_router]#, export_router]
+
+@export_router.post(path='/pdf',
+            tags=['pdf'],
+            summary='Export book as PDF',
+            description='Export book as PDF',
+            response_model=None,#FileResponse,
+            responses={
+                200: {
+                    "description": "Success",
+                },
+            }
+                   )
+# TODO: raise "ValueError: stat: embedded null character in path" after this function (inside fastapi)
+# FileResponse expect string instead ByteIO or ByteIO.read()
+async def to_pdf(book: tp.List[PageUrl]) -> FileResponse:
+    loaded = BookLoader.from_urls(book=book, raise_mode=True)
+    headers = {'Content-Disposition': 'inline; filename="out.pdf"'}
+    #headers = {'Content-Disposition': 'attachment; filename="out.pdf"'}
+    return FileResponse(Exporter.to_pdf(book=loaded).read(), headers=headers, media_type='application/pdf')
+
+
+ROUTERS = [new_router, static_router, export_router]
