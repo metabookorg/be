@@ -115,9 +115,9 @@ export_router: APIRouter = APIRouter(prefix='/export')
 # FileResponse expect string instead ByteIO or ByteIO.read()
 async def to_pdf(book: tp.List[PageUrl]) -> StreamingResponse:
     loaded = BookLoader.from_urls(book=book, raise_mode=True)
-    headers = {'Content-Disposition': 'inline; filename="out.pdf"'}
-    #headers = {'Content-Disposition': 'attachment; filename="out.pdf"'}
-    return StreamingResponse(Exporter.to_pdf(book=loaded).read(), headers=headers, media_type='application/pdf')
+    #headers = {'Content-Disposition': 'inline; filename="out.pdf"'}
+    headers = {'Content-Disposition': 'attachment; filename="out.pdf"'}
+    return StreamingResponse(Exporter.to_pdf(book=loaded), headers=headers, media_type='application/pdf')
 
 
 ROUTERS = [new_router, static_router, export_router]
