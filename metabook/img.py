@@ -57,7 +57,7 @@ class ImgsCreator(BaseImgsCreator):
                 while text[0] == ' ':
                     text = text[1:]
                 if page_prompt.idx != 0:
-                    text = f"{page_prompt.txt.capitalize()}."
+                    text = f"{text.capitalize()}."
                 self.images_urls.append(PageUrl(txt=text, idx=page_prompt.idx, url=url))
             except Exception as e:
                 print(f"ERROR: {e}")
