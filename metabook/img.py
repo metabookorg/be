@@ -53,7 +53,12 @@ class ImgsCreator(BaseImgsCreator):
                 print(f"TEXT: {page_prompt.prompt}")
                 url = Dalle2.create(description=page_prompt.prompt, url_mode=True, n=1)[0]
                 print(f"URL: {url}")
-                self.images_urls.append(PageUrl(txt=page_prompt.txt, idx=page_prompt.idx, url=url))
+                text = page_prompt.txt
+                while text[0] == ' ':
+                    text = text[1:]
+                if page_prompt.idx != 0:
+                    text = f"{page_prompt.txt.capitalize()}."
+                self.images_urls.append(PageUrl(txt=text, idx=page_prompt.idx, url=url))
             except Exception as e:
                 print(f"ERROR: {e}")
         print(f"Pics successfully created.")

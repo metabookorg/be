@@ -56,9 +56,10 @@ class TxtAnalyzer:
             if len(splitted) == 2:
                 name = splitted[0].lower()
                 descr = splitted[1].split('.')[0].lower()
-                if descr[0] == ' ':
-                    descr = descr[1: ]
-                characters[name] = descr
+                if descr:
+                    if descr[0] == ' ':
+                        descr = descr[1: ]
+                    characters[name] = descr
         return characters
 
     @classmethod
