@@ -1,4 +1,6 @@
 import pydantic as pdt
+import openai
+
 
 __all__ = (
     "BaseSettings",
@@ -20,3 +22,5 @@ class BaseSettings(pdt.BaseSettings):
 class OpenAISettings(BaseSettings):
     apikey: str = pdt.Field(env='OPENAI_APIKEY')
 
+
+openai.apikey = OpenAISettings.apikey

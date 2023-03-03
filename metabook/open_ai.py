@@ -3,9 +3,6 @@ import typing as tp
 import os
 
 
-openai.api_key = os.getenv(key='OPENAI_APIKEY', default='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')
-
-
 class GPT3:
 
     models_map: tp.Dict[int, str] = {
